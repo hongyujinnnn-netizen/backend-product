@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: Hong312005
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: u5w6DrN9g1xQ4Fk7hR2tY8pC3sV0LmZaBnj1Xc5b6d7e8f9g0h1j2k3l4m5n6p7
+  expiration: 86400000

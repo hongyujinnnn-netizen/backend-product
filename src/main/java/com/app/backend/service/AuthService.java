@@ -1,15 +1,17 @@
 package com.app.backend.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.app.backend.dto.LoginRequest;
 import com.app.backend.dto.LoginResponse;
 import com.app.backend.dto.RegisterRequest;
 import com.app.backend.model.User;
 import com.app.backend.repository.UserRepository;
 import com.app.backend.security.JwtUtil;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

@@ -1,5 +1,11 @@
 package com.app.backend.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.app.backend.dto.OrderRequest;
 import com.app.backend.model.Order;
 import com.app.backend.model.OrderItem;
@@ -8,12 +14,8 @@ import com.app.backend.model.User;
 import com.app.backend.repository.OrderRepository;
 import com.app.backend.repository.ProductRepository;
 import com.app.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,8 @@ public class OrderService {
 
 		Order order = new Order();
 		order.setUser(user);
+		order.setUsername(user.getUsername());
+		order.setUserEmail(user.getEmail());
 
 		BigDecimal total = BigDecimal.ZERO;
 
@@ -63,10 +67,18 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Order> getOrdersForUser(String username) {
-		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new IllegalArgumentException("User not found"));
-		return orderRepository.findByUserOrderByCreatedAtDesc(user);
+	public List<Order> getOrdersForUser(String username, Integer limit) {
+		// Fetch newest-first by username without requiring caller to load User entity
+		List<Order> orders = orderRepository.findByUserUsernameOrderByCreatedAtDesc(username);
+		if (orders.isEmpty()) {
+			// Keep behavior consistent with previous flow: throw if user missing
+			userRepository.findByUsername(username)
+					.orElseThrow(() -> new IllegalArgumentException("User not found"));
+		}
+		if (limit != null && limit > 0) {
+			return orders.stream().limit(limit).toList();
+		}
+		return orders;
 	}
 
 	@Transactional(readOnly = true)

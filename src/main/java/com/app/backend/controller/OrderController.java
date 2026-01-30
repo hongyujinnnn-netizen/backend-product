@@ -1,10 +1,8 @@
 package com.app.backend.controller;
 
-import com.app.backend.dto.OrderRequest;
-import com.app.backend.model.Order;
-import com.app.backend.service.OrderService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.security.Principal;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,10 +10,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
-import java.util.List;
+import com.app.backend.dto.OrderRequest;
+import com.app.backend.model.Order;
+import com.app.backend.service.OrderService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -34,15 +37,16 @@ public class OrderController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Order>> getMyOrders(Principal principal) {
+	public ResponseEntity<List<Order>> getMyOrders(Principal principal,
+			@RequestParam(value = "limit", required = false) Integer limit) {
 		if (principal == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		return ResponseEntity.ok(orderService.getOrdersForUser(principal.getName()));
+		return ResponseEntity.ok(orderService.getOrdersForUser(principal.getName(), limit));
 	}
 
 	@GetMapping("/all")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<Order>> getAllOrders() {
 		return ResponseEntity.ok(orderService.getAllOrders());
 	}

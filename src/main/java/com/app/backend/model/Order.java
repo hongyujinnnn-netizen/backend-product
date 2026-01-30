@@ -1,6 +1,13 @@
 package com.app.backend.model;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,11 +27,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,7 +43,16 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
+
+    @Column(name = "username", length = 50)
+    @JsonProperty("username")
+    private String username;
+
+    @Column(name = "user_email", length = 100)
+    @JsonProperty("userEmail")
+    private String userEmail;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
@@ -62,4 +73,5 @@ public class Order {
     public Long userId() {
         return user != null ? user.getId() : null;
     }
+
 }

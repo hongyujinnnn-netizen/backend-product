@@ -57,6 +57,9 @@ public class Order {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
+    @Column(nullable = false, length = 20)
+    private String status = "PENDING";
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

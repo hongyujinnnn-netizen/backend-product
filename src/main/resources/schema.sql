@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     price NUMERIC(12, 2) NOT NULL,
     stock INTEGER NOT NULL CHECK (stock >= 0),
+    categories VARCHAR(255),
     image_url VARCHAR(500)
 );
 
@@ -25,13 +26,16 @@ CREATE TABLE IF NOT EXISTS orders (
     username VARCHAR(50),
     user_email VARCHAR(100),
     total NUMERIC(12, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT chk_status CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'))
 );
 
 -- Ensure snapshot columns exist for existing databases
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS username VARCHAR(50);
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_email VARCHAR(100);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'PENDING';
 
 -- Create Order Items Table
 CREATE TABLE IF NOT EXISTS order_items (

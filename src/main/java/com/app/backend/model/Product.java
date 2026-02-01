@@ -1,5 +1,7 @@
 package com.app.backend.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,8 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -40,6 +40,9 @@ public class Product {
 
     @Column(nullable = false)
     private Integer stock;
+
+    @Column(length = 255)
+    private String categories;
 
     @Column(name = "image_url")
     private String imageUrl;

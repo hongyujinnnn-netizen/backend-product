@@ -45,6 +45,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private String role;
 
+    @Column(nullable = false, length = 20)
+    private String status;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @JsonIgnore

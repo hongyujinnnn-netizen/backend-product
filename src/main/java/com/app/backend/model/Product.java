@@ -44,6 +44,12 @@ public class Product {
     @Column(length = 255)
     private String categories;
 
+    @Column(length = 255)
+    private String tags;
+
+    @Column(columnDefinition = "TEXT")
+    private String features;
+
     @Column(name = "image_url")
     private String imageUrl;
 }

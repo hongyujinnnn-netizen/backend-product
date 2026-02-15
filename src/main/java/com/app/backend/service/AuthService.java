@@ -35,6 +35,7 @@ public class AuthService {
 				.email(request.email())
 				.password(passwordEncoder.encode(request.password()))
 				.role("ROLE_USER")
+				.status("ACTIVE")
 				.build();
 		userRepository.save(user);
 
@@ -49,6 +50,9 @@ public class AuthService {
 
 		if (!passwordEncoder.matches(request.password(), user.getPassword())) {
 			throw new IllegalArgumentException("Invalid credentials");
+		}
+		if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+			throw new IllegalArgumentException("Account is not active");
 		}
 
 		JwtUtil.JwtToken token = jwtUtil.generateToken(user.getUsername(), user.getRole());

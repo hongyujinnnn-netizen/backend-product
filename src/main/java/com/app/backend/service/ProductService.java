@@ -34,6 +34,7 @@ public class ProductService {
 		if (productRepository.existsByNameIgnoreCase(product.getName())) {
 			throw new IllegalArgumentException("Product with this name already exists");
 		}
+		normalizeTextFields(product);
 		sanitizePrice(product);
 		return productRepository.save(product);
 	}
@@ -49,6 +50,9 @@ public class ProductService {
 		existing.setDescription(updatedProduct.getDescription());
 		existing.setPrice(normalizePrice(updatedProduct.getPrice()));
 		existing.setStock(updatedProduct.getStock());
+		existing.setCategories(normalizeOptionalText(updatedProduct.getCategories()));
+		existing.setTags(normalizeTags(updatedProduct.getTags()));
+		existing.setFeatures(normalizeOptionalText(updatedProduct.getFeatures()));
 		existing.setImageUrl(updatedProduct.getImageUrl());
 		return productRepository.save(existing);
 	}
@@ -61,6 +65,33 @@ public class ProductService {
 
 	private void sanitizePrice(Product product) {
 		product.setPrice(normalizePrice(product.getPrice()));
+	}
+
+	private void normalizeTextFields(Product product) {
+		product.setCategories(normalizeOptionalText(product.getCategories()));
+		product.setTags(normalizeTags(product.getTags()));
+		product.setFeatures(normalizeOptionalText(product.getFeatures()));
+	}
+
+	private String normalizeTags(String tags) {
+		String normalized = normalizeOptionalText(tags);
+		if (normalized == null) {
+			return null;
+		}
+		return java.util.Arrays.stream(normalized.split(","))
+				.map(String::trim)
+				.filter(tag -> !tag.isEmpty())
+				.distinct()
+				.reduce((left, right) -> left + ", " + right)
+				.orElse(null);
+	}
+
+	private String normalizeOptionalText(String value) {
+		if (value == null) {
+			return null;
+		}
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
 	}
 
 	private BigDecimal normalizePrice(BigDecimal price) {

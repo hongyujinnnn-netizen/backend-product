@@ -5,8 +5,15 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL,
-    CONSTRAINT chk_role CHECK (role IN ('ROLE_USER', 'ROLE_ADMIN'))
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    CONSTRAINT chk_role CHECK (role IN ('ROLE_USER', 'ROLE_ADMIN')),
+    CONSTRAINT chk_user_status CHECK (status IN ('ACTIVE', 'DISABLED', 'BANNED'))
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20);
+ALTER TABLE users ALTER COLUMN status SET DEFAULT 'ACTIVE';
+UPDATE users SET status = 'ACTIVE' WHERE status IS NULL OR TRIM(status) = '';
+ALTER TABLE users ALTER COLUMN status SET NOT NULL;
 
 -- Create Products Table
 CREATE TABLE IF NOT EXISTS products (
@@ -16,8 +23,18 @@ CREATE TABLE IF NOT EXISTS products (
     price NUMERIC(12, 2) NOT NULL,
     stock INTEGER NOT NULL CHECK (stock >= 0),
     categories VARCHAR(255),
+    tags VARCHAR(255),
+    features TEXT,
     image_url VARCHAR(500)
 );
+
+-- Keep products.features compatible with richer text and clean null semantics
+ALTER TABLE products ADD COLUMN IF NOT EXISTS tags VARCHAR(255);
+ALTER TABLE products ALTER COLUMN features TYPE TEXT;
+ALTER TABLE products ALTER COLUMN features DROP NOT NULL;
+ALTER TABLE products ALTER COLUMN features DROP DEFAULT;
+UPDATE products SET tags = NULL WHERE TRIM(tags) = '';
+UPDATE products SET features = NULL WHERE TRIM(features) = '';
 
 -- Create Orders Table
 CREATE TABLE IF NOT EXISTS orders (

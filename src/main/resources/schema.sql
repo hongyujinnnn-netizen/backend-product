@@ -75,3 +75,57 @@ CREATE INDEX IF NOT EXISTS idx_orders_user_email ON orders(user_email);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
+
+-- ============================================================
+-- Reviews (MVP)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS reviews (
+    id BIGSERIAL PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    rating INTEGER NOT NULL,
+    title VARCHAR(120) NOT NULL,
+    comment TEXT NOT NULL,
+    reviewer_name VARCHAR(80),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    verified_purchase BOOLEAN NOT NULL DEFAULT FALSE,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    moderation_reason TEXT,
+    moderated_by BIGINT,
+    moderated_at TIMESTAMP,
+    CONSTRAINT fk_reviews_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviews_moderated_by FOREIGN KEY (moderated_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT chk_reviews_rating CHECK (rating BETWEEN 1 AND 5),
+    CONSTRAINT chk_reviews_status CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'HIDDEN'))
+);
+
+-- One review per user per product (common marketplace rule)
+CREATE UNIQUE INDEX IF NOT EXISTS ux_reviews_product_user ON reviews(product_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_product_status_created ON reviews(product_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reviews_product_rating ON reviews(product_id, rating);
+CREATE INDEX IF NOT EXISTS idx_reviews_user_created ON reviews(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS review_images (
+    id BIGSERIAL PRIMARY KEY,
+    review_id BIGINT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_review_images_review FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_review_images_review_sort ON review_images(review_id, sort_order, id);
+
+CREATE TABLE IF NOT EXISTS helpful_votes (
+    id BIGSERIAL PRIMARY KEY,
+    review_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_helpful_votes_review FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE,
+    CONSTRAINT fk_helpful_votes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_helpful_votes_review_user ON helpful_votes(review_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_helpful_votes_review ON helpful_votes(review_id);

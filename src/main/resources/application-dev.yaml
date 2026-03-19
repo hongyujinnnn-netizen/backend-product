@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: YOUR_LOCAL_PASSWORD
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -18,9 +18,6 @@ spring:
     init:
       mode: always
 
-server:
-  port: ${PORT:8080}
-
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:86400000}
+  secret: YOUR_LOCAL_JWT_SECRET
+  expiration: 86400000
